@@ -48,8 +48,8 @@ async function pollNow() {
   }
 }
 
-// Auto-start in development
-if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
-  // Start polling every hour in development
-  setTimeout(() => startPolling(60), 5000) // 5 second delay to let app start
-}
+// Auto-start disabled - scheduler now handles view updates
+// if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+//   // Start polling every hour in development
+//   setTimeout(() => startPolling(60), 5000) // 5 second delay to let app start
+// }

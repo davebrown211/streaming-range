@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Play, TrendingUp, Calendar, Eye, ThumbsUp } from 'lucide-react'
+import { Play, TrendingUp, Eye } from 'lucide-react'
 import { api, VideoOfTheDay } from '@/lib/api'
 
 export default function VideoOfTheDayComponent() {
@@ -19,6 +19,24 @@ export default function VideoOfTheDayComponent() {
       setError(null)
       const videoData = await api.getVideoOfTheDay()
       setVideo(videoData)
+      
+      // Check if this video has existing audio
+      if (videoData.video_id) {
+        try {
+          const response = await fetch(`/api/generate-transcript-summary/${videoData.video_id}`, {
+            method: 'GET'
+          })
+          if (response.ok) {
+            const data = await response.json()
+            if (data.audioUrl) {
+              setAudioUrl(data.audioUrl)
+            }
+          }
+        } catch (err) {
+          // Silently fail - no audio available
+          console.log('No existing audio found for video')
+        }
+      }
     } catch (err) {
       console.error('Error loading video of the day:', err)
       setError('Failed to load video of the day')
@@ -43,6 +61,76 @@ export default function VideoOfTheDayComponent() {
     if (velocity > 5000) return 'Fast trending'
     if (velocity > 1000) return 'Gaining momentum'
     return 'Steady growth'
+  }
+
+  const loadSummary = async (videoId: string) => {
+    try {
+      setSummaryLoading(true)
+      
+      // First check if video of the day already has AI summary
+      if (video?.ai_summary) {
+        setSummary(video.ai_summary)
+        return
+      }
+      
+      // Try the new transcript-based summary first
+      let response = await fetch(`/api/generate-transcript-summary/${videoId}`, {
+        method: 'POST'
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        setSummary(data.summary)
+        // Set audio URL if available (should be streaming URL)
+        if (data.audioUrl) {
+          setAudioUrl(data.audioUrl)
+        }
+        return
+      }
+      
+      // Fallback to original summary API
+      response = await fetch(`/api/video-summary/${videoId}`, {
+        method: 'POST'
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        setSummary(data.summary)
+      } else {
+        setSummary('Unable to generate summary at this time. The video may not have captions available.')
+      }
+    } catch (err) {
+      console.error('Error loading summary:', err)
+      setSummary('Error generating summary. Please try again later.')
+    } finally {
+      setSummaryLoading(false)
+    }
+  }
+
+  const loadAudio = async (videoId: string) => {
+    try {
+      setAudioLoading(true)
+      
+      // Generate audio by calling the transcript summary endpoint
+      // This will create the audio file and return the URL
+      const response = await fetch(`/api/generate-transcript-summary/${videoId}`, {
+        method: 'POST'
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        if (data.audioUrl) {
+          setAudioUrl(data.audioUrl)
+        }
+      } else {
+        console.error('Failed to generate audio')
+      }
+      
+    } catch (err) {
+      console.error('Error loading audio:', err)
+    } finally {
+      setAudioLoading(false)
+    }
   }
 
   if (isLoading) {
@@ -90,15 +178,9 @@ export default function VideoOfTheDayComponent() {
 
   return (
     <div className="mb-16">
-      {/* Video of the Day Header */}
-      <div className="flex items-center space-x-4 mb-6">
-        <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
-          <TrendingUp className="w-8 h-8 text-white" />
-        </div>
-        <div>
-          <h2 className="text-3xl font-bold text-white tracking-tight">Video of the Day</h2>
-          <p className="text-purple-300">🔥 Trending now • {getDaysAgoText(video.days_ago)}</p>
-        </div>
+      {/* Trending Now Indicator */}
+      <div className="mb-6">
+        <p className="text-purple-300">🔥 Trending now • {getDaysAgoText(video.days_ago)}</p>
       </div>
 
       {/* Main Video Card */}
@@ -125,20 +207,6 @@ export default function VideoOfTheDayComponent() {
                 </div>
               </div>
 
-              {/* Video Type Badge */}
-              <div className="absolute top-4 right-4">
-                <div className="px-3 py-1 bg-purple-500/90 backdrop-blur-sm rounded-full text-white text-sm font-medium">
-                  {video.is_short ? 'Short' : 'Video'}
-                </div>
-              </div>
-
-              {/* Trending Badge */}
-              <div className="absolute top-4 left-4">
-                <div className="px-3 py-1 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full text-white text-sm font-medium flex items-center space-x-1">
-                  <TrendingUp className="w-4 h-4" />
-                  <span>{getVelocityText(video.view_velocity)}</span>
-                </div>
-              </div>
             </div>
           </div>
 
@@ -149,42 +217,31 @@ export default function VideoOfTheDayComponent() {
                 {video.title}
               </h3>
               <p className="text-purple-200 text-lg font-medium">{video.channel}</p>
-            </div>
-
-            {/* Stats Grid */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
-                <div className="flex items-center space-x-2 mb-1">
-                  <Eye className="w-5 h-5 text-blue-400" />
-                  <span className="text-blue-300 text-sm font-medium">Views</span>
-                </div>
-                <p className="text-white text-xl font-bold">{formatViews(video.views)}</p>
-              </div>
-
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
-                <div className="flex items-center space-x-2 mb-1">
-                  <ThumbsUp className="w-5 h-5 text-green-400" />
-                  <span className="text-green-300 text-sm font-medium">Likes</span>
-                </div>
-                <p className="text-white text-xl font-bold">{formatViews(video.likes)}</p>
-              </div>
-
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
-                <div className="flex items-center space-x-2 mb-1">
-                  <TrendingUp className="w-5 h-5 text-purple-400" />
-                  <span className="text-purple-300 text-sm font-medium">Engagement</span>
-                </div>
-                <p className="text-white text-xl font-bold">{video.engagement}</p>
-              </div>
-
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
-                <div className="flex items-center space-x-2 mb-1">
-                  <Calendar className="w-5 h-5 text-yellow-400" />
-                  <span className="text-yellow-300 text-sm font-medium">Published</span>
-                </div>
-                <p className="text-white text-xl font-bold">{getDaysAgoText(video.days_ago)}</p>
+              
+              {/* View count */}
+              <div className="flex items-center space-x-2 mt-3">
+                <Eye className="w-5 h-5 text-blue-400" />
+                <span className="text-blue-300 font-medium">{formatViews(video.views)} views</span>
               </div>
             </div>
+
+            {/* Show audio player if available, otherwise show nothing */}
+            {audioUrl && (
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6">
+                <div className="flex items-center justify-between">
+                  <p className="text-white font-medium">Audio Recap</p>
+                  
+                  <audio
+                    controls
+                    className="h-8"
+                    preload="metadata"
+                  >
+                    <source src={audioUrl} type="audio/mpeg" />
+                    Your browser does not support the audio element.
+                  </audio>
+                </div>
+              </div>
+            )}
 
             {/* Watch Button */}
             <button

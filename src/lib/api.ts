@@ -54,6 +54,9 @@ export interface VideoOfTheDay {
   duration_seconds?: number
   is_short: boolean
   days_ago: number
+  has_ai_analysis?: boolean
+  analysis_status?: string | null
+  ai_summary?: string | null
 }
 
 class GolfDirectoryAPI {
@@ -120,15 +123,15 @@ class GolfDirectoryAPI {
 
   // Format view count for display
   formatViews(views: string | number): string {
-    const num = typeof views === 'string' ? parseInt(views) : views
+    const num = typeof views === 'string' ? parseInt(views.replace(/,/g, '')) : views
     
     if (num >= 1000000) {
-      return `${(num / 1000000).toFixed(1)}M`
+      return `${Math.floor(num / 1000000)}M`
     } else if (num >= 1000) {
-      return `${(num / 1000).toFixed(1)}K`
+      return `${Math.floor(num / 1000)}K`
     }
     
-    return num.toString()
+    return num.toLocaleString()
   }
 
   // Format duration from seconds to MM:SS

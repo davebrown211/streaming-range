@@ -1,0 +1,24 @@
+<svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+  <!-- Golf ball circle -->
+  <circle cx="8" cy="8" r="7" fill="white" stroke="#333" stroke-width="0.5"/>
+  
+  <!-- Dimples pattern -->
+  <circle cx="6" cy="5" r="0.8" fill="#ddd"/>
+  <circle cx="10" cy="5" r="0.8" fill="#ddd"/>
+  <circle cx="5" cy="8" r="0.8" fill="#ddd"/>
+  <circle cx="8" cy="7" r="0.8" fill="#ddd"/>
+  <circle cx="11" cy="8" r="0.8" fill="#ddd"/>
+  <circle cx="6" cy="11" r="0.8" fill="#ddd"/>
+  <circle cx="10" cy="11" r="0.8" fill="#ddd"/>
+  <circle cx="8" cy="10" r="0.8" fill="#ddd"/>
+  
+  <!-- Smaller dimples -->
+  <circle cx="7" cy="4" r="0.4" fill="#ddd"/>
+  <circle cx="9" cy="4" r="0.4" fill="#ddd"/>
+  <circle cx="4" cy="6" r="0.4" fill="#ddd"/>
+  <circle cx="12" cy="6" r="0.4" fill="#ddd"/>
+  <circle cx="4" cy="10" r="0.4" fill="#ddd"/>
+  <circle cx="12" cy="10" r="0.4" fill="#ddd"/>
+  <circle cx="7" cy="12" r="0.4" fill="#ddd"/>
+  <circle cx="9" cy="12" r="0.4" fill="#ddd"/>
+</svg>

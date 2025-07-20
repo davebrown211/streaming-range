@@ -34,7 +34,12 @@ async function runDailyCollection() {
       'golf putting tips',
       'golf short game',
       'golf driver tips',
-      'golf iron tips'
+      'golf iron tips',
+      // New terms to catch entertainment golf content
+      'golf road trip',
+      'golf trip',
+      'golf adventure',
+      'Bob Does Sports golf'
     ]
     
     console.log(`🎯 Running ${dailySearchTerms.length} targeted searches...`)

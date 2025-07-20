@@ -1,0 +1,10 @@
+{
+  "functions": {
+    "src/app/api/generate-transcript-summary/[videoId]/route.ts": {
+      "maxDuration": 60
+    },
+    "src/app/api/collect-today-videos/route.ts": {
+      "maxDuration": 30
+    }
+  }
+}

@@ -24,7 +24,13 @@ export class ChannelMonitor {
     { id: 'UCwOImVq9GMSalyC_uS3b-2Q', title: 'TaylorMade Golf' },
     { id: 'UCJKDS0Kym93MJSdhFqA8HTg', title: 'Mark Crossfield' },
     { id: 'UCm8OIxLBpNJFRbcnXJcXdNw', title: 'Golf Sidekick' },
-    { id: 'UCbNRBQptR5CL4rX7eI3SWPQ', title: 'James Robinson Golf' }
+    { id: 'UCbNRBQptR5CL4rX7eI3SWPQ', title: 'James Robinson Golf' },
+    { id: 'UCqr4sONkmFEOPc3rfoVLEvg', title: 'Bob Does Sports' },
+    // Recently added creators
+    { id: 'UClOp9ASmFYATO1zFfpB7QlA', title: 'Eric Cogorno Golf' },
+    { id: 'UCokFauAYvXnr3e9TZQFESIQ', title: 'Matt Fryer Golf' },
+    { id: 'UCJolpQHWLAW6cCUYGgean8w', title: 'Padraig Harrington' },
+    { id: 'UC_GolfChannelID', title: 'Golf Channel' } // Need to find actual ID
   ]
 
   constructor() {

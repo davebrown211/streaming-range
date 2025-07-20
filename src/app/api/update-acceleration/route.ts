@@ -25,26 +25,12 @@ export async function POST() {
       // Calculate acceleration for all videos with enough data
       await updateAllVideoAccelerations()
       
-      // Broadcast updates via WebSocket
+      // Broadcast simple update notification (no rankings)
       wsServer.broadcastStatsUpdate({
-        message: 'Data updated',
+        message: 'View data updated',
         videos_processed: videosResult.rows.length,
         timestamp: new Date().toISOString()
       })
-      
-      // Trigger ranking updates and broadcast them
-      const rankingTypes = ['all_time_views', 'weekly_trending', 'high_engagement']
-      for (const type of rankingTypes) {
-        try {
-          const response = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/rankings/${type}?limit=3`)
-          if (response.ok) {
-            const rankings = await response.json()
-            wsServer.broadcastRankingUpdate(type, rankings)
-          }
-        } catch (err) {
-          console.error(`Failed to fetch rankings for ${type}:`, err)
-        }
-      }
       
       return NextResponse.json({ 
         message: 'Acceleration calculations updated',

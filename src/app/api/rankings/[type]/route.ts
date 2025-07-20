@@ -156,61 +156,38 @@ export async function GET(
         `
         params = [limit]
       } else if (type === 'daily_trending') {
-        // Daily Trending: ONLY videos from last 24 hours, fallback to 48 hours if needed
+        // Daily Trending: Videos uploaded in the last 24 hours with highest views
         const shortsFilter = includeShorts ? 'AND yv.duration_seconds IS NOT NULL AND yv.duration_seconds <= 60' : 'AND (yv.duration_seconds IS NULL OR yv.duration_seconds > 60)'
         query = `
-          WITH todays_videos AS (
-            SELECT 
-              yv.title,
-              yc.title as channel,
-              yv.view_count,
-              yv.like_count,
-              yv.engagement_rate,
-              yv.published_at,
-              yv.id as video_id,
-              yv.thumbnail_url,
-              (yv.engagement_rate * 200) + (yv.view_count / 100) as daily_score
-            FROM youtube_videos yv
-            JOIN youtube_channels yc ON yv.channel_id = yc.id
-            WHERE yv.published_at >= NOW() - INTERVAL '24 hours'  -- ONLY last 24 hours
-              AND yv.view_count > 100  -- Lower threshold for very recent content
-              AND yv.engagement_rate > 0.1  -- Lower engagement requirement for fresh content
-              ${shortsFilter}
-            ORDER BY daily_score DESC
-            LIMIT 30
-          ),
-          recent_fallback AS (
-            SELECT 
-              yv.title,
-              yc.title as channel,
-              yv.view_count,
-              yv.like_count,
-              yv.engagement_rate,
-              yv.published_at,
-              yv.id as video_id,
-              yv.thumbnail_url,
-              (yv.engagement_rate * 100) + (yv.view_count / 200) as daily_score
-            FROM youtube_videos yv
-            JOIN youtube_channels yc ON yv.channel_id = yc.id
-            WHERE yv.published_at >= NOW() - INTERVAL '48 hours'  -- Fallback to 48 hours
-              AND yv.published_at < NOW() - INTERVAL '24 hours'   -- But exclude already selected 24h videos
-              AND yv.view_count > 500
-              AND yv.engagement_rate > 0.5
-              ${shortsFilter}
-            ORDER BY daily_score DESC
-            LIMIT 30
-          ),
-          combined_videos AS (
-            SELECT * FROM todays_videos
-            UNION ALL
-            SELECT * FROM recent_fallback
-          )
           SELECT 
-            ROW_NUMBER() OVER (ORDER BY RANDOM()) as rank,
-            title, channel, view_count, like_count, engagement_rate, 
-            published_at, video_id, thumbnail_url
-          FROM combined_videos
-          ORDER BY RANDOM()  -- True randomization across all recent videos
+            ROW_NUMBER() OVER (ORDER BY yv.view_count DESC) as rank,
+            yv.title,
+            yc.title as channel,
+            yv.view_count,
+            yv.like_count,
+            yv.engagement_rate,
+            yv.published_at,
+            yv.id as video_id,
+            yv.thumbnail_url
+          FROM youtube_videos yv
+          JOIN youtube_channels yc ON yv.channel_id = yc.id
+          WHERE yv.published_at >= NOW() - INTERVAL '24 hours'
+            ${shortsFilter}
+            AND yv.title ~ '^[A-Za-z0-9$#"'']'  -- Must start with English letters/numbers or common chars
+            AND yv.title !~ '[가-힣]'  -- Exclude Korean
+            AND yv.title !~ '[あ-ん]'  -- Exclude Japanese hiragana
+            AND yv.title !~ '[ア-ン]'  -- Exclude Japanese katakana
+            AND yv.title !~ '[一-龯]'  -- Exclude Chinese/Japanese kanji
+            AND yv.title !~ '[ก-๙]'  -- Exclude Thai
+            AND yv.title !~ '[א-ת]'  -- Exclude Hebrew
+            AND yv.title !~ '[ا-ي]'  -- Exclude Arabic
+            AND yv.title !~ '[а-я]'  -- Exclude Cyrillic
+            AND yv.title NOT ILIKE '%volkswagen%'  -- Exclude VW Golf cars
+            AND yv.title NOT ILIKE '%vw golf%'
+            AND yv.title NOT ILIKE '%gta%'  -- Exclude GTA games
+            AND yv.title NOT ILIKE '%forza%'  -- Exclude racing games
+            AND yv.title NOT ILIKE '%drive beyond%'  -- Exclude racing games
+          ORDER BY yv.view_count DESC
           LIMIT $1
         `
         params = [limit]

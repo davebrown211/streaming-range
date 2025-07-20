@@ -1,25 +1,32 @@
 // Initialize backend services
-import { scheduler } from './scheduler'
 import { wsServer } from './websocket-server'
 
 let initialized = false
 
 export function initializeServices() {
-  if (initialized) return
-  
-  console.log('Initializing Golf Directory services...')
-  
-  // Start WebSocket server
-  if (process.env.NODE_ENV === 'development') {
-    wsServer.start(8080)
+  if (initialized) {
+    console.log('StreamingRange services already initialized')
+    return
   }
   
-  // Start scheduler (it has its own production/dev logic)
-  // scheduler.start() is called automatically in the scheduler module
+  console.log('Initializing StreamingRange services...')
+  
+  // Only start WebSocket server in development and if not already running
+  if (process.env.NODE_ENV === 'development') {
+    try {
+      wsServer.start(8080)
+    } catch (error) {
+      console.log('WebSocket server start failed (likely already running):', error)
+    }
+  }
   
   initialized = true
   console.log('Services initialized')
 }
 
-// Auto-initialize
-initializeServices()
+// Auto-initialize with delay to avoid conflicts
+if (typeof window === 'undefined') {
+  setTimeout(() => {
+    initializeServices()
+  }, 1000)
+}
