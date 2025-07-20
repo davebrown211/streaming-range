@@ -76,7 +76,7 @@ export async function GET() {
             yv.thumbnail_url,
             yv.duration_seconds,
             -- Include AI analysis data
-            va.result as ai_analysis,
+            va.summary as ai_analysis,
             va.character_analysis,
             va.captions_preview,
             va.status as analysis_status,
@@ -91,7 +91,6 @@ export async function GET() {
           FROM youtube_videos yv
           JOIN youtube_channels yc ON yv.channel_id = yc.id
           LEFT JOIN video_analyses va ON va.video_id = yv.id
-            AND va.status = 'COMPLETED'
           WHERE yv.published_at >= NOW() - '14 day'::interval  -- Expand search window  
             AND yv.view_count > 100                           -- Much lower threshold to find recent content
             AND (yv.engagement_rate > 0.1 OR yv.engagement_rate IS NULL)  -- Allow null engagement for recent videos
