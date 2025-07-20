@@ -42,8 +42,8 @@ export class VideoService {
         INSERT INTO youtube_videos (
           id, title, description, channel_id, published_at, view_count, 
           like_count, comment_count, engagement_rate, view_velocity,
-          duration_seconds, thumbnail_url, category, content_type, updated_at
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW())
+          duration_seconds, thumbnail_url, category, updated_at
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW())
         ON CONFLICT (id) DO UPDATE SET
           view_count = $6,
           like_count = $7,
@@ -65,8 +65,7 @@ export class VideoService {
         viewVelocity,
         durationSeconds,
         videoData.thumbnail,
-        category,
-        mode
+        category
       ])
 
     } finally {
