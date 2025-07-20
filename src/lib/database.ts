@@ -2,9 +2,16 @@ import { Pool } from 'pg'
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL || 'postgresql://postgres:mysecretpassword@localhost/postgres',
-  max: 20,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
+  ssl: process.env.DATABASE_URL?.includes('ondigitalocean.com') ? {
+    rejectUnauthorized: false
+  } : false,
+  max: 10, // Reduce max connections
+  min: 2,  // Minimum connections to keep alive
+  idleTimeoutMillis: 60000, // 1 minute
+  connectionTimeoutMillis: 10000, // 10 seconds
+  acquireTimeoutMillis: 15000, // 15 seconds to get connection from pool
+  statement_timeout: 30000, // 30 seconds for query timeout
+  query_timeout: 30000, // 30 seconds for query timeout
 })
 
 export default pool
