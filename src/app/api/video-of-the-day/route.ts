@@ -90,7 +90,7 @@ export async function GET() {
             END as momentum_score
           FROM youtube_videos yv
           JOIN youtube_channels yc ON yv.channel_id = yc.id
-          LEFT JOIN video_analyses va ON va.video_id = yv.id
+          LEFT JOIN video_analyses va ON va.youtube_url LIKE '%' || yv.id || '%'
             AND va.status = 'COMPLETED'
           WHERE yv.published_at >= NOW() - '14 day'::interval  -- Expand search window  
             AND yv.view_count > 100                           -- Much lower threshold to find recent content
