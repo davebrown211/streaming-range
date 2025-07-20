@@ -28,7 +28,7 @@ export async function GET(request: Request) {
       WHERE yv.channel_id != ALL($1::text[])  -- Exclude whitelisted channels
         AND yv.published_at >= NOW() - INTERVAL '90 days'  -- Match curated timeframe
         AND yv.view_count > 100   -- Lower threshold to show more discovery content
-        AND yv.duration_seconds >= 180   -- At least 3 minutes to filter out shorts
+        AND yv.duration_seconds >= 60    -- At least 1 minute to filter out very short clips
         AND (yv.title ILIKE '%golf%' OR yc.title ILIKE '%golf%')  -- Must be golf content
         AND yv.title !~* '(round [0-9]|r[0-9]|mpo \\||fpo \\||klpga|kpga|championship 20|tournament highlights|final round|course maintenance)'  -- Exclude tournaments
         AND yv.title !~ '[あ-ん]'                          -- Exclude Japanese hiragana
