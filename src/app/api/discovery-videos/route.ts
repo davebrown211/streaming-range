@@ -27,7 +27,7 @@ export async function GET(request: Request) {
       JOIN youtube_channels yc ON yv.channel_id = yc.id
       WHERE yv.channel_id != ALL($1::text[])  -- Exclude whitelisted channels
         AND yv.published_at >= NOW() - INTERVAL '90 days'  -- Match curated timeframe
-        AND yv.view_count > 500   -- Keep higher threshold for discovery quality
+        AND yv.view_count > 100   -- Lower threshold to show more discovery content
         AND yv.duration_seconds >= 180   -- At least 3 minutes to filter out shorts
         AND (yv.title ILIKE '%golf%' OR yc.title ILIKE '%golf%')  -- Must be golf content
         AND yv.title !~* '(round [0-9]|r[0-9]|mpo \\||fpo \\||klpga|kpga|championship 20|tournament highlights|final round|course maintenance)'  -- Exclude tournaments
