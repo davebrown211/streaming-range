@@ -147,7 +147,7 @@ export async function GET() {
         channel: video.channel,
         views: (video.view_count || 0).toString(),
         likes: (video.like_count || 0).toString(),
-        engagement: video.engagement_rate ? `${video.engagement_rate.toFixed(2)}%` : 'N/A',
+        engagement: (video.engagement_rate && typeof video.engagement_rate === 'number') ? `${Number(video.engagement_rate).toFixed(2)}%` : 'N/A',
         published: video.published_at.toISOString().split('T')[0],
         url: `https://youtube.com/watch?v=${video.video_id}`,
         thumbnail: video.thumbnail_url,
